@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FWI Prediction</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#f4f6f9; margin:0; }
+    .container { max-width:600px; margin:40px auto; background:#fff; padding:25px;
+                 border-radius:10px; box-shadow:0 4px 8px rgba(0,0,0,0.1); }
+    h2 { text-align:center; color:#333; }
+    .form-group { margin-bottom:15px; }
+    label { display:block; font-weight:bold; margin-bottom:5px; }
+    input, select { width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; }
+    button { width:100%; padding:12px; background:#5c69ed; color:#fff; border:none;
+             border-radius:6px; font-size:16px; cursor:pointer; }
+    button:hover { background:#4a55c4; }
+    .result-section { margin-top:30px; padding:20px; border-radius:8px; background:#eef2ff; display:none; }
+    .result-section h3 { margin-top:0; }
+    @media(max-width:480px){ .container{margin:20px; padding:15px;} h2{font-size:20px;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>FWI Prediction Form</h2>
+    <form id="fwiForm">
+      <div class="form-group"><label>Temperature (°C)</label><input type="number" name="temperature" required></div>
+      <div class="form-group"><label>Relative Humidity (%)</label><input type="number" name="RH" required></div>
+      <div class="form-group"><label>Wind Speed (km/h)</label><input type="number" name="WS" required></div>
+      <div class="form-group"><label>Rain (mm)</label><input type="number" name="RAIN" required></div>
+      <div class="form-group"><label>FFMC</label><input type="number" name="FFMC" required></div>
+      <div class="form-group"><label>DMC</label><input type="number" name="DMC" required></div>
+      <div class="form-group"><label>ISI</label><input type="number" name="ISI" required></div>
+      <div class="form-group">
+        <label>Classes</label>
+        <select name="Classes" required>
+          <option value="">Select Class</option>
+          <option value="Low">Low</option>
+          <option value="Moderate">Moderate</option>
+          <option value="High">High</option>
+          <option value="Extreme">Extreme</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Region</label><input type="text" name="Region" required></div>
+      <button type="submit">Get Prediction</button>
+    </form>
+
+    <!-- Result Section -->
+    <div class="result-section" id="resultSection">
+      <h3>Prediction Result</h3>
+      <p id="resultText"></p>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('fwiForm');
+    const resultSection = document.getElementById('resultSection');
+    const resultText = document.getElementById('resultText');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const formData = new FormData(form);
+      const data = Object.fromEntries(formData.entries());
+      console.log(data)
+      resultText.textContent = "Loading prediction...";
+      resultSection.style.display = 'block';
+
+      try {
+        const response = await fetcah('/predict_datapoint', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+        const result = await response.json();
+        resultText.textContent = `FWI Prediction: ${result.prediction}`;
+      } catch (error) {
+        resultText.textContent = "Error fetching prediction.";
+      }
+    });
+  </script>
+</body>
+</html>
